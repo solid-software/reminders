@@ -2,6 +2,7 @@ import 'reminder.dart';
 export 'reminder.dart';
 import 'reminders_list.dart';
 export 'reminders_list.dart';
+export 'alarm.dart';
 
 import 'reminders_platform_interface.dart';
 

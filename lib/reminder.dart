@@ -1,3 +1,4 @@
+import 'package:reminders/alarm.dart';
 import 'reminders_list.dart';
 
 class Reminder {
@@ -9,6 +10,7 @@ class Reminder {
   bool isCompleted;
   DateTime? completionDate;
   String? notes;
+  List<Alarm> alarms;
 
   Reminder(
       {required this.list,
@@ -18,7 +20,8 @@ class Reminder {
       this.priority = 0,
       this.isCompleted = false,
       this.completionDate,
-      this.notes});
+      this.notes,
+      this.alarms = const []});
 
   Reminder.fromJson(Map<String, dynamic> json)
       : list = RemList.fromJson(json['list']),
@@ -26,7 +29,11 @@ class Reminder {
         title = json['title'],
         priority = json['priority'],
         isCompleted = json['isCompleted'],
-        notes = json['notes'] {
+        notes = json['notes'],
+        alarms = (json['alarms'] as List<dynamic>?)
+                ?.map((alarmJson) => Alarm.fromJson(alarmJson))
+                .toList() ??
+            [] {
     if (json['dueDate'] != null) {
       final date = json['dueDate'];
       dueDate = DateTime(date['year']!, date['month']!, date['day']!,
@@ -71,11 +78,13 @@ class Reminder {
                 'minute': completionDate?.minute,
                 'second': completionDate?.second,
               },
-        'notes': notes
+        'notes': notes,
+        'alarms': alarms.map((alarm) => alarm.toJson()).toList(),
       };
 
   @override
   String toString() =>
       '''List: ${list.title}\tTitle: $title\tdueDate: $dueDate\tPriority:
-      $priority\tisComplete: $isCompleted \tCompletionDate:$completionDate\tNotes: $notes\tID: $id''';
+      $priority\tisComplete: $isCompleted \tCompletionDate:$completionDate\tNotes: 
+      $notes\tAlarms: ${alarms.map((a) => a.relativeOffset).toList()}\tID: $id''';
 }

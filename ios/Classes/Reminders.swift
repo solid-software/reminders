@@ -92,7 +92,13 @@ class Reminders {
         } else {
             reminder.dueDateComponents = nil
         }
-
+       if let alarms = json["alarms"] as? [[String: Any]] {
+            for alarm in alarms {
+                if let offset = alarm["relativeOffset"] as? Double {
+                    reminder.addAlarm(EKAlarm(relativeOffset: offset))
+                }
+            }
+        }    
         do {
             try eventStore.save(reminder, commit: true)
         } catch {
@@ -125,7 +131,8 @@ struct Reminder : Codable {
     let isCompleted: Bool
     let completionDate: Date?
     let notes: String?
-
+    let alarms: [Alarm]
+   
     init(reminder : EKReminder) {
         self.list = List(list: reminder.calendar)
         self.id = reminder.calendarItemIdentifier
@@ -135,6 +142,7 @@ struct Reminder : Codable {
         self.isCompleted = reminder.isCompleted
         self.completionDate = reminder.completionDate
         self.notes = reminder.notes
+        self.alarms = reminder.alarms?.compactMap { Alarm(alarm: $0) } ?? []                       
     }
 
     func toJson() -> String? {
@@ -155,5 +163,13 @@ struct List : Codable {
     func toJson() -> String? {
         let jsonData = try? JSONEncoder().encode(self)
         return String(data: jsonData ?? Data(), encoding: .utf8)
+    }
+}
+
+struct Alarm: Codable {
+    let relativeOffset: Double?
+
+    init(alarm: EKAlarm) {
+        self.relativeOffset = alarm.relativeOffset
     }
 }
